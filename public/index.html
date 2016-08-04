@@ -13,31 +13,71 @@
     // Well-known entry point, called by hosting infrastructure
     function PluginMain(sheetRef) {        
         _plugin = _pluginModule.MyPlugin.BrowserEntry(sheetRef);
+        
+        _plugin.initAsync( function () {
+            $("#prebody").hide();
+            $("#body").show();
+            alert("load complete");
+         } );
     }
 </script>
 <script src="https://trcanvasdata.blob.core.windows.net/code2/plugin.js"></script>
 
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <title>Basic TRC plugin</title>
 </head>
+
 <body>
-    <p>
-        This is an empty TRC plugin that demonstrates calling PluginMain().
-    </p>
 
-    <h2>Basic sheet information:</h2>
+    <div id="prebody">
+        Loading...
+    </div>
+
+    <div id="body" style="display:none">
+    <h2>Search</h2>
+
+    <h3>Enter search criteria</h3>
+
+    <div id="startMsg"></div>
+
     <table>
-        <tr><td>Name:</td><td><div id="SheetName"></div></td></tr>
-        <tr><td>Parent:</td><td><div id="ParentSheetName"></div></td></tr>
-        <tr><td>Version:</td><td><div id="SheetVer"></div></td></tr>
-        <tr><td>Total Rows:</td><td><div id="RowCount"></div></td></tr>
-        <tr><td>Last refreshed:</td><td><div id="LastRefreshed"></div></td></tr>
-    </table>      
+        <tr>
+            <td>First</td>
+            <td>
+                <input size=80 type=text id="First" />
+            </td>
+        </tr>
+        <tr>
+            <td>Last</td>
+            <td>
+                <input size=80 type=text id="Last" />
+            </td>
+        </tr>
+        <tr>
+            <td>City</td>
+            <td>
+                <input size=80 type=text id="City" />
+            </td>
+        </tr>
+        <tr>
+            <td>Zip</td>
+            <td>
+                <input size=80 type=text id="Zip" />
+            </td>
+        </tr>
+    </table>
 
-    <button onclick="_plugin.onClickRefresh()">Refresh!</button>
+    <button onclick="_plugin.onSearch()">Search!</button>
 
-    <p>Congratulations! You made your first TRC plugin!</p>
+    <h3>Search Results:</h3>
+    <div id="countMsg"></div>
+    <div id="main"></div>
+
+    </div>
+
 </body>
+
 </html>
