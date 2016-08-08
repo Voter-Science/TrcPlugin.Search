@@ -20,22 +20,6 @@ export class MyPlugin {
 
     public constructor(sheet: trc.Sheet) {
         this._sheet = sheet; // Save for when we do Post
-
-/*
-        var result : trc.ISheetContents =  { };
-        result["Alpha"] = ["A1", "A2"];
-        result["Beta"] = ["B1", "B2"];
-        result["Charlie"] = ["C1", "C2"];
-
-        var render = new html.RenderSheetOptions(result);
-        render.setColumns(["Alpha", "Charlie"]);
-
-        render.setHtml("Alpha", (iRow : number) => {
-            var recId = result["Alpha"][iRow];
-            return "<b>" + recId+ "</b>";
-        });
-        render.renderSheet("main");
-*/
     }
 
     public initAsync(next: () => void): void {
@@ -47,9 +31,7 @@ export class MyPlugin {
                 next();
             });
         });
-    }
-
-    
+    }    
 
     protected resetUi(): void {
         // clear previous results
@@ -70,14 +52,14 @@ export class MyPlugin {
 
         // Render to sheet. 
         //MyPlugin.renderSheetToDiv(result, "main");
-        var render = new html.RenderSheetOptions(result);
+        var render = new html.RenderSheet("main", result);
         render.setColumnInfo(this._info.Columns);
         // render.setColumns(["RecId", "FirstName", "LastName"])
         render.setHtml("RecId", (iRow : number) => {
             var recId = result["RecId"][iRow];
             return "jump to <b>" + recId+ "</b>";
         });
-        render.renderSheet("main");
+        render.render();
 
         $("#countMsg").html("Found <b>" + render.getCountRows() + "</b> row(s) matching criteria.");
     }
@@ -87,35 +69,6 @@ export class MyPlugin {
             return null;
         }
         return x.toUpperCase();
-    }
-
-    // Put this in a common helper library $$$  
-    // applies fpInclude on each row in source sheet. 
-    // Returns a new sheet with same columns, but is a subset.  
-    public static GetRows(
-        source: trc.ISheetContents,
-        fpInclude: (idx: number) => boolean)
-        : trc.ISheetContents {
-        var columnNames: string[] = [];
-        var results: trc.ISheetContents = {};
-        for (var columnName in source) {
-            columnNames.push(columnName);
-            results[columnName] = [];
-        }
-
-        var cRecId: string[] = source["RecId"];
-        //for(var iRow  in cRecId)
-        for (var iRow = 0; iRow < cRecId.length; iRow++) {
-            var keepRow: boolean = fpInclude(iRow);
-            if (keepRow) {
-                for (var x in columnNames) {
-                    var columnName = columnNames[x];
-                    var val = source[columnName][iRow];
-                    results[columnName].push(val)
-                }
-            }
-        }
-        return results;
     }
 
     // target is already normalized. other is not. 
@@ -145,8 +98,8 @@ export class MyPlugin {
         var cCity = this._data["City"];
         var cZip = this._data["Zip"];
 
-        // $$$ Compare - if ends in "*", do a suffix match. 
-        var result = MyPlugin.GetRows(this._data,
+        // $$$ Compare - if ends in "*", do a suffix match.         
+        var result = trc.SheetContents.KeepRows(this._data,
             (iRow) => {
                 if (MyPlugin.Mismatch(last, cLast[iRow]))                
                 {
