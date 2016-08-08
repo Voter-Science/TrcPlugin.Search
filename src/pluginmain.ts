@@ -3,7 +3,7 @@
 // This calls TRC APIs and binds to specific HTML elements from the page.  
 
 import * as trc from '../node_modules/trclib/trc2';
-import * as html from './trchtml';
+import * as html from '../node_modules/trclib/trchtml';
 
 declare var $: any; // external definition for JQuery 
 
