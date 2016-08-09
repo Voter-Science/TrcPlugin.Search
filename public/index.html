@@ -11,10 +11,8 @@
     var _plugin = null;
 
     // Well-known entry point, called by hosting infrastructure
-    function PluginMain(sheetRef) {        
-        _plugin = _pluginModule.MyPlugin.BrowserEntry(sheetRef);
-        
-        _plugin.initAsync( function () {
+    function PluginMain(sheetRef, opts) {        
+        _plugin = _pluginModule.MyPlugin.BrowserEntry(sheetRef, opts, function () {
             $("#prebody").hide();
             $("#body").show();            
          } );

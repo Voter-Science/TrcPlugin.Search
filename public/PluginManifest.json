@@ -1,10 +1,10 @@
 ﻿{
     // ID must be unique on the gallery
-    "Id": "PluginTemplate",
-    "Name": "An empty plugin",
+    "Id": "Search",
+    "Name": "Simple search for individuals within a sheet",
     "Author" :  "Voter-Science",
     "Website" :  "https://github.com/Voter-Science/TRC-API-Samples",
-    "Description": "An empty plugin that just gets the initial login and shows basic sheet properties.",        
+    "Description": "Plugin that lets you do fuzzy name search within the sheet.",        
     "Version": "1.0.0", // User SemVer
-    "Tags": [ "demo"  ]
+    "Tags": [ "demo" , "search", "_single" ]
 }

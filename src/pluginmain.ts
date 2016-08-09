@@ -11,16 +11,25 @@ export class MyPlugin {
     private _sheet: trc.Sheet;
     private _data: trc.ISheetContents;
     private _info: trc.ISheetInfoResult;
-
-    // Entry point called from brower. 
-    public static BrowserEntry(sheet: trc.ISheetReference): MyPlugin {
-        var trcSheet = new trc.Sheet(sheet);
-        return new MyPlugin(trcSheet);
-    }
+    private _opts : trc.PluginOptionsHelper;
 
     public constructor(sheet: trc.Sheet) {
         this._sheet = sheet; // Save for when we do Post
     }
+
+    // Entry point called from brower. 
+    public static BrowserEntry(
+        sheet: trc.ISheetReference,
+        opts : trc.IPluginOptions,
+        next: () => void
+    ): MyPlugin {
+        var trcSheet = new trc.Sheet(sheet);
+        var plugin = new MyPlugin(trcSheet);
+        plugin._opts = trc.PluginOptionsHelper.New(opts, trcSheet);
+
+        plugin.initAsync(next);
+        return plugin;
+    }   
 
     public initAsync(next: () => void): void {
         this._sheet.getInfo(info => {
@@ -28,6 +37,18 @@ export class MyPlugin {
             this._sheet.getSheetContents((data) => {
                 this._data = data;
                 this.resetUi();
+
+                // if passed a recId, then do that for the initial filter
+                var recId :string = this._opts.getStartupRecId();
+                if (recId != null)
+                {            
+                    var recIds = this._data["RecId"];       
+                    var result = trc.SheetContents.KeepRows(this._data, 
+                        (rowIdx) => recIds[rowIdx] == recId );
+                    
+                    this.renderResult(result);
+                }
+
                 next();
             });
         });
@@ -50,14 +71,18 @@ export class MyPlugin {
         // In-memory search 
         var result = this.search2(first, last, city, zip);
 
-        // Render to sheet. 
-        //MyPlugin.renderSheetToDiv(result, "main");
+        this.renderResult(result);
+    }
+
+    // Render filtered rows to html.
+    private renderResult(result : trc.ISheetContents) : void {    
         var render = new html.RenderSheet("main", result);
         render.setColumnInfo(this._info.Columns);
         // render.setColumns(["RecId", "FirstName", "LastName"])
         render.setHtml("RecId", (iRow : number) => {
             var recId = result["RecId"][iRow];
-            return "jump to <b>" + recId+ "</b>";
+            //return "jump to <b>" + recId+ "</b>";
+            return "jump to <a href='" + this._opts.getGotoLinkRecId(recId) +"' _target='blank'>" + recId + "</a>";
         });
         render.render();
 
