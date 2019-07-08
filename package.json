@@ -1,32 +1,28 @@
 {
-  "name": "trc.sampleplugin",
+  "name": "trc-search",
   "version": "1.0.0",
-  "description": "sample plugin for trc",
+  "description": "Trc plugin for bulk updating",
   "main": "index.js",
-  "directories": {
-    "test": "tests"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "start": "npm run build && node node_modules/trc.runplugin/index.js dist"
   },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "trclib": "^1.0.0"
+    "@types/react": "^16.8.14",
+    "@types/react-dom": "^16.8.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "trc-analyze": "^1.6.0",
+    "trc-react": "^1.0.0",
+    "trc-sheet": "^1.11.0"
   },
   "devDependencies": {
-    "browserify": "^13.1.0",
-    "chai": "^3.5.0",
-    "express": "^4.14.0",
-    "mocha": "^3.0.0",
-    "typescript": "^1.8.10"
-  },
-  "scripts": {
-    "pretest": "tsc -p tests",
-    "test": "mocha tests",
-    "prebuild": "tsc -p src",
-    "build": "browserify -r ./src/pluginmain.js:pluginmain -o public/bundle.js",
-    "start" : "npm run build && node src/runlocal.js"
-  },
-  "keywords": [
-    "sample",
-    "trc"
-  ],
-  "author": "",
-  "license": "ISC"
+    "awesome-typescript-loader": "^5.2.1",
+    "source-map-loader": "^0.2.4",
+    "trc.runplugin": "^1.4.4",
+    "typescript": "^3.4.5"
+  }
 }
