@@ -20,6 +20,13 @@ export class FieldInputs extends React.Component<{
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleClear = this.handleClear.bind(this);
+    }
+   
+    handleClear() {
+        var vals : any = {};
+        this.props.Names.forEach((name : string) => { vals[name] = "" });
+        this.setState({ Vals : vals});
     }
 
     handleSubmit(event: any) {
@@ -50,13 +57,14 @@ export class FieldInputs extends React.Component<{
     render() {
         var ns : string[] = this.props.Names;
         return <div>
-            {ns.map((name : string) => <div>
+            {ns.map((name : string) => <div  key={"_x" + name}>
                 <input key={name} type="text" placeholder={"(" + name + ")"}
                         value={this.state.Vals[name]}
                         onChange={(x) => this.updateFieldState(name, x.target.value)}></input>
             </div>)}
 
             <button onClick={this.handleSubmit}>Next</button>
+            <button onClick={this.handleClear}>Clear</button>
         </div>
     } 
 }
