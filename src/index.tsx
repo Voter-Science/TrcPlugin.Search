@@ -12,32 +12,33 @@ import { ColumnNames, ISheetContents, SheetContents } from "trc-sheet/sheetConte
 
 import * as bcl from 'trc-analyze/collections'
 import { PluginLink } from "trc-react/dist/PluginLink";
-import { CsvMatchInput} from 'trc-react/dist/CsvMatchInput';
+import { CsvMatchInput } from 'trc-react/dist/CsvMatchInput';
 import { ListColumns } from 'trc-react/dist/ListColumns';
 import { SimpleTable } from 'trc-react/dist/SimpleTable';
 
 declare var _trcGlobal: IMajorState;
 
-interface ILookupValues
-{
+interface ILookupValues {
     RecId: string;
-    First : string;
-    Last : string;
-    City : string;
-    Zip : string;
+    First: string;
+    Last: string;
+    City: string;
+    Zip: string;
 }
 
 // Lets somebody lookup a voter, and then answer questions about them. 
 // See all answers in Audit. 
 export class App extends React.Component<{}, {
     // record: any // if undefined, still picking a voter. 
-    results? : ISheetContents // results of search
+    results?: ISheetContents // results of search
 }>
 {
+    private _topN  = 10;
+
     public constructor(props: any) {
         super(props);
 
-        this.state = {            
+        this.state = {
         };
         this.renderBody1 = this.renderBody1.bind(this);
         this.onSearch = this.onSearch.bind(this);
@@ -46,9 +47,10 @@ export class App extends React.Component<{}, {
         // Do the search
         // alert(record.First + "  " + record.Last + " " + " " + record.City + " " + record.Zip );
 
-         // In-memory search 
-         var result = this.search2(record.RecId, record.First, record.Last, record.City, record.Zip);
-         this.setState({results : result});
+        // In-memory search 
+        var result = this.search2(record.RecId, record.First, record.Last, record.City, record.Zip);
+        result = SheetContents.TakeN(result, this._topN);
+        this.setState({ results: result });
     }
 
     private static norm(x: string): string {
@@ -59,63 +61,61 @@ export class App extends React.Component<{}, {
     }
 
     // target is already normalized. other is not. 
-    private static Mismatch(target : string, other: string) : boolean
-    {
+    private static Mismatch(target: string, other: string): boolean {
         if (!target) {
             return false;
         }
-        other = App.norm(other); 
+        other = App.norm(other);
         return (other != target);
     }
 
-        // Return the rows in _data that match the filter.  
-        public search2(
-            recId : string,
-            first: string,
-            last: string,
-            city: string,
-            zip: string
-        ): ISheetContents {
-            var data = _trcGlobal._contents;
+    // Return the rows in _data that match the filter.  
+    public search2(
+        recId: string,
+        first: string,
+        last: string,
+        city: string,
+        zip: string
+    ): ISheetContents {
+        var data = _trcGlobal._contents;
 
-            first = App.norm(first);
-            last = App.norm(last);
-            city = App.norm(city);
-            zip = App.norm(zip);
-    
-            var cRecIds = data[ColumnNames.RecId];
-            var cFirst = data[ColumnNames.FirstName];
-            var cLast = data[ColumnNames.LastName];
-            var cCity = data[ColumnNames.City];
-            var cZip = data[ColumnNames.Zip];
-    
-            // $$$ Compare - if ends in "*", do a suffix match.         
-            var result = SheetContents.KeepRows(data,
-                (iRow) => {
-                    if (App.Mismatch(recId, cRecIds[iRow]) || 
-                        App.Mismatch(last, cLast[iRow]) || 
-                        App.Mismatch(first, cFirst[iRow]) ||
-                        App.Mismatch(city, cCity[iRow]) ||
-                        App.Mismatch(zip, cZip[iRow]))
-                    {
-                        return false;   
-                    }
-                    return true;
-                });
-    
-            return result;
-        }
+        first = App.norm(first);
+        last = App.norm(last);
+        city = App.norm(city);
+        zip = App.norm(zip);
+
+        var cRecIds = data[ColumnNames.RecId];
+        var cFirst = data[ColumnNames.FirstName];
+        var cLast = data[ColumnNames.LastName];
+        var cCity = data[ColumnNames.City];
+        var cZip = data[ColumnNames.Zip];
+
+        // $$$ Compare - if ends in "*", do a suffix match.         
+        var result = SheetContents.KeepRows(data,
+            (iRow) => {
+                if (App.Mismatch(recId, cRecIds[iRow]) ||
+                    App.Mismatch(last, cLast[iRow]) ||
+                    App.Mismatch(first, cFirst[iRow]) ||
+                    App.Mismatch(city, cCity[iRow]) ||
+                    App.Mismatch(zip, cZip[iRow])) {
+                    return false;
+                }
+                return true;
+            });
+
+        return result;
+    }
 
     private renderBody1() {
         {
             return <div>
-                <h2>Search</h2>            
+                <h2>Search</h2>
                 <div>Enter Search criteria:</div>
                 <div>{_trcGlobal._info.CountRecords} total records. </div>
-                <FieldInputs Names={["RecId","First","Last","City","Zip"]} onSubmit={this.onSearch}></FieldInputs>                
+                <FieldInputs Names={["RecId", "First", "Last", "City", "Zip"]} onSubmit={this.onSearch}></FieldInputs>
 
                 {this.state.results && <SimpleTable data={this.state.results} ></SimpleTable>}
-             </div>
+            </div>
         }
     }
 
