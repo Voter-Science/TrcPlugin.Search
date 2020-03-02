@@ -1,4 +1,4 @@
-# TrcPluginTemplate
-A basic search plugin for the TRC sheet
+# Search 
+A basic search plugin for the TRC sheet. Allows looking up individuals and answering questions for an individual. 
 
-Based of the template at https://github.com/Voter-Science/TrcPluginTemplate and using NPM libraries at https://github.com/Voter-Science/TrcLibNpm 
+Rebuilt on React. 

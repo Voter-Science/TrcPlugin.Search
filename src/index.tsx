@@ -23,8 +23,10 @@ interface ILookupValues {
     RecId: string;
     First: string;
     Last: string;
+    Address :string;
     City: string;
     Zip: string;
+    PrecinctName : string;
 }
 
 // Lets somebody lookup a voter, and then answer questions about them. 
@@ -66,7 +68,8 @@ export class App extends React.Component<{}, {
         if (x == null || x == undefined || x.length == 0) {
             return null;
         }
-        return x.toUpperCase();
+        // trip leading / ending blanks.
+        return x.trim().toUpperCase();
     }
 
     // target is already normalized. other is not. 
@@ -82,7 +85,8 @@ export class App extends React.Component<{}, {
     public search3(
         record : ILookupValues
     ): ISheetContents { 
-        return this.search2(record.RecId, record.First, record.Last, record.City, record.Zip);
+        return this.search2(record.RecId, record.First, record.Last,
+            record.Address, record.City, record.Zip, record.PrecinctName);
     }
 
     // Return the rows in _data that match the filter.  
@@ -90,21 +94,27 @@ export class App extends React.Component<{}, {
         recId: string,
         first: string,
         last: string,
+        address :string,
         city: string,
-        zip: string
+        zip: string,
+        precinctName : string
     ): ISheetContents {
         var data = _trcGlobal._contents;
 
         first = App.norm(first);
         last = App.norm(last);
+        address = App.norm(address);
         city = App.norm(city);
         zip = App.norm(zip);
+        precinctName = App.norm(precinctName);
 
         var cRecIds = data[ColumnNames.RecId];
         var cFirst = data[ColumnNames.FirstName];
         var cLast = data[ColumnNames.LastName];
+        var cAddress = data[ColumnNames.Address];
         var cCity = data[ColumnNames.City];
         var cZip = data[ColumnNames.Zip];
+        var cPrecinctName = data[ColumnNames.PrecinctName];
 
         // $$$ Compare - if ends in "*", do a suffix match.         
         var result = SheetContents.KeepRows(data,
@@ -112,8 +122,11 @@ export class App extends React.Component<{}, {
                 if (App.Mismatch(recId, cRecIds[iRow]) ||
                     App.Mismatch(last, cLast[iRow]) ||
                     App.Mismatch(first, cFirst[iRow]) ||
+                    App.Mismatch(address, cAddress[iRow]) ||
                     App.Mismatch(city, cCity[iRow]) ||
-                    App.Mismatch(zip, cZip[iRow])) {
+                    App.Mismatch(zip, cZip[iRow]) ||
+                    App.Mismatch(precinctName, cPrecinctName[iRow]) 
+                    ) {
                     return false;
                 }
                 return true;
@@ -182,13 +195,15 @@ export class App extends React.Component<{}, {
 
         return <div>
             <h2>Search</h2>
-            <div>Enter Search criteria:</div>
+            <p>This searches for specific individuals within the sheet and will also let you update answers for them. Use <PluginLink id={"Filter"}></PluginLink> to get counts. </p>
+            <div>Enter Search criteria: (Blanks match everything)</div>
             <div>{_trcGlobal._info.CountRecords} total records. </div>
-            <FieldInputs Names={["RecId", "First", "Last", "City", "Zip"]} onSubmit={this.onSearch}></FieldInputs>
+            <FieldInputs Names={["RecId", "First", "Last", "Address", "City", "Zip", "PrecinctName"]} onSubmit={this.onSearch}></FieldInputs>
 
             <h3>Search Results</h3>
             {this.state.results && <SimpleTable data={this.state.results} ></SimpleTable>}
-            {this.state.totalFound && <p>Found {this.state.totalFound} results.</p>}
+            {this.state.totalFound  &&  <p>Found {this.state.totalFound} total result(s).</p>}
+            {(this.state.totalFound  && this.state.totalFound > this._topN) &&  <p>Showing first {this._topN} results. Narrow the search further.</p>}
 
             <h3>Edit answers</h3>
             {this.renderQuestions()}
