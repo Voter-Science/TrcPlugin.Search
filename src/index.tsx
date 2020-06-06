@@ -22,13 +22,14 @@ interface ILookupValues {
     Address :string;
     City: string;
     Zip: string;
-    PrecinctName : string;
+    PrecinctName: string;
 }
 
 interface IState {
-    results?: ISheetContents // results of search
-    totalFound?: number,
-    searchCriteria?: ILookupValues
+    selectedRecId?: string;
+    results?: ISheetContents; // results of search
+    totalFound?: number;
+    searchCriteria?: ILookupValues;
 }
 
 // Lets somebody lookup a voter, and then answer questions about them.
@@ -39,16 +40,16 @@ export class App extends React.Component<{}, IState> {
     public constructor(props: any) {
         super(props);
 
-        this.state = {}
+        this.state = {
+            selectedRecId: null
+        }
 
         this.renderBody1 = this.renderBody1.bind(this);
         this.onSearch = this.onSearch.bind(this);
         this.onSubmitAnswers = this.onSubmitAnswers.bind(this);
     }
 
-    private onSearch(record: ILookupValues) {
-        // Do the search
-
+    private onSearch(record: ILookupValues, resetSelectedRecId: boolean = true) {
         // In-memory search
         var result = this.search3(record);
         var totalFound = result["RecId"].length;
@@ -56,8 +57,11 @@ export class App extends React.Component<{}, IState> {
         this.setState({
             results: result,
             totalFound: totalFound,
-            searchCriteria :  record
+            searchCriteria: record
         });
+        if (resetSelectedRecId) {
+            this.setState({ selectedRecId: null });
+        }
     }
 
     private static norm(x: string): string {
@@ -143,6 +147,9 @@ export class App extends React.Component<{}, IState> {
 
         var idx = 0; // selected from search results.
         var data = this.state.results;
+        if (this.state.selectedRecId) {
+            idx = data["RecId"].findIndex((x) => x === this.state.selectedRecId);
+        }
         var recId = data["RecId"][idx];
 
         var columnNames: string[] = [];
@@ -165,7 +172,7 @@ export class App extends React.Component<{}, IState> {
             .then(() => {
                 // Success. Now go back to looking up another voter.
                 alert("Successfully recorded");
-                this.onSearch(this.state.searchCriteria);
+                this.onSearch(this.state.searchCriteria, false);
             }).catch((err) => {
                 alert("Failed to post response: " + err);
             });
@@ -174,22 +181,28 @@ export class App extends React.Component<{}, IState> {
     private renderQuestions() {
         var data = this.state.results;
 
-        if (!data)
-        {
+        if (!data) {
             return <div>No search results.</div>
         }
-        if (data["RecId"].length > 1)
-        {
+
+        if (data["RecId"].length > 1 && !this.state.selectedRecId) {
             return (
                 <div>
-                    Must reduce to a single record. You can use RecId criteria
-                    to specify an exact record.
+                    Must reduce to a single record or select one from the table above.
+                    You can use RecId criteria to specify an exact record.
                 </div>
             )
         }
+
+        let index = 0;
+
+        if (this.state.selectedRecId) {
+            index = data["RecId"].findIndex((x) => x === this.state.selectedRecId);
+        }
+
         return (
             <div>
-                <p>Fill in answers for: {data["RecId"][0]}</p>
+                <p>Fill in answers for: {data["RecId"][index]}</p>
                 <AllQuestions
                     onSubmit={this.onSubmitAnswers}
                     columns={_trcGlobal._info.Columns}
@@ -245,7 +258,7 @@ export class App extends React.Component<{}, IState> {
                         <SimpleTable
                             downloadIcon
                             data={this.state.results}
-                            onRowClick={(recId: string) => alert(recId)}
+                            onRowClick={(recId: string) => this.setState({ selectedRecId: recId })}
                         />
                     )}
                     {!this.state.totalFound && <div>Results will appear here.</div>}
