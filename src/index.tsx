@@ -241,7 +241,9 @@ export class App extends React.Component<{}, IState> {
                         </Copy>
                     </Grid>
                     <FieldInputs
+                        data={_trcGlobal._contents}
                         Names={["RecId", "First", "Last", "Address", "City", "Zip", "PrecinctName"]}
+                        Keys={["RecId", "FirstName", "LastName", "Address", "City", "Zip", "PrecinctName"]}
                         onSubmit={this.onSearch}
                     />
                 </Panel>

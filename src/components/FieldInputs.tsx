@@ -8,12 +8,14 @@ import { TextInput } from "trc-react/dist/common/TextInput";
 // Generic control for collecting some input fields.
 
 interface IProps {
-    Names: string[]
-    onSubmit?: (record: any) => void
+    data: any;
+    Names: string[];
+    Keys: string[];
+    onSubmit?: (record: any) => void;
 }
 
 interface IState {
-    Vals: any // keys are from Names
+    Vals: any; // keys are from Names
 }
 
 export class FieldInputs extends React.Component<IProps, IState> {
@@ -38,7 +40,6 @@ export class FieldInputs extends React.Component<IProps, IState> {
     }
 
     handleSubmit(event: any) {
-
         // Normalize data. Convert "" to undefined.
         var x: any = {};
         for(var key in this.state.Vals) {
@@ -64,14 +65,28 @@ export class FieldInputs extends React.Component<IProps, IState> {
     }
 
     render() {
-        var ns: string[] = this.props.Names;
+        const { data, Keys, Names } = this.props;
 
-        const inputs = ns.map((name: string) => (
-            <TextInput key={name} type="text" placeholder={"(" + name + ")"}
-                value={this.state.Vals[name]}
-                onChange={(x) => this.updateFieldState(name, x.target.value)}
-                label={name}
-            />
+        const inputs = Names.map((name: string, index) => (
+            <div>
+                <TextInput
+                    key={name}
+                    type="text"
+                    placeholder={"(" + name + ")"}
+                    value={this.state.Vals[name]}
+                    onChange={(x) => this.updateFieldState(name, x.target.value)}
+                    label={name}
+                    list={`datalist-${Keys[index]}`}
+                />
+                <datalist id={`datalist-${Keys[index]}`}>
+                    {data[Keys[index]]
+                        ?.filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
+                        .map((value: string, j: number) => (
+                            <option key={j} value={value} />
+                        )
+                    )}
+                </datalist>
+            </div>
         ));
 
         return (
