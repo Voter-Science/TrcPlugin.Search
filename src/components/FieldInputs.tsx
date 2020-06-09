@@ -16,6 +16,8 @@ interface IProps {
 
 interface IState {
     Vals: any; // keys are from Names
+    activeInputKey: string;
+    dataListItems: string[];
 }
 
 export class FieldInputs extends React.Component<IProps, IState> {
@@ -26,7 +28,9 @@ export class FieldInputs extends React.Component<IProps, IState> {
         props.Names.forEach((name: string) => { vals[name] = "" });
 
         this.state = {
-            Vals: vals
+            Vals: vals,
+            activeInputKey: null,
+            dataListItems: []
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -58,34 +62,41 @@ export class FieldInputs extends React.Component<IProps, IState> {
         event.preventDefault();
     }
 
-    private updateFieldState(name: string, val: string): void {
+    private updateFieldState(name: string, val: string, key: string): void {
         var vals = this.state.Vals;
         vals[name] = val;
-        this.setState({ Vals: vals});
+
+        const uniqueValues = [...new Set(this.props.data[key])] as string[];
+        const filteredDataList = uniqueValues
+            .filter((x: string) => {
+                const a = x.toLowerCase();
+                const b = val.toLowerCase();
+                if (a === b) return false;
+                return a.indexOf(b) !== -1;
+            })
+            .slice(0, 8);
+
+        this.setState({
+            Vals: vals,
+            activeInputKey: key,
+            dataListItems: filteredDataList
+        });
     }
 
     render() {
         const { data, Keys, Names } = this.props;
 
-        const inputs = Names.map((name: string, index) => (
+        const inputs = Names.map((name: string, i) => (
             <div>
                 <TextInput
                     key={name}
                     type="text"
                     placeholder={"(" + name + ")"}
                     value={this.state.Vals[name]}
-                    onChange={(x) => this.updateFieldState(name, x.target.value)}
+                    onChange={(x) => this.updateFieldState(name, x.target.value, Keys[i])}
                     label={name}
-                    list={`datalist-${Keys[index]}`}
+                    list={`datalist-${Keys[i]}`}
                 />
-                <datalist id={`datalist-${Keys[index]}`}>
-                    {data[Keys[index]]
-                        ?.filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
-                        .map((value: string, j: number) => (
-                            <option key={j} value={value} />
-                        )
-                    )}
-                </datalist>
             </div>
         ));
 
@@ -94,6 +105,14 @@ export class FieldInputs extends React.Component<IProps, IState> {
                 <Grid>
                     {inputs}
                 </Grid>
+
+                {this.state.dataListItems.length > 0 && (
+                    <datalist id={`datalist-${this.state.activeInputKey}`}>
+                        {this.state.dataListItems.map((value: string, i: number) => (
+                            <option key={i} value={value} />
+                        ))}
+                    </datalist>
+                )}
 
                 <HorizontalList alignRight>
                     <Button onClick={this.handleClear} secondary>Clear</Button>
