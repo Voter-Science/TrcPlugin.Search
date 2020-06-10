@@ -87,17 +87,15 @@ export class FieldInputs extends React.Component<IProps, IState> {
         const { data, Keys, Names } = this.props;
 
         const inputs = Names.map((name: string, i) => (
-            <div>
-                <TextInput
-                    key={name}
-                    type="text"
-                    placeholder={"(" + name + ")"}
-                    value={this.state.Vals[name]}
-                    onChange={(x) => this.updateFieldState(name, x.target.value, Keys[i])}
-                    label={name}
-                    list={`datalist-${Keys[i]}`}
-                />
-            </div>
+            <TextInput
+                key={name}
+                type="text"
+                placeholder={"(" + name + ")"}
+                value={this.state.Vals[name]}
+                onChange={(x) => this.updateFieldState(name, x.target.value, Keys[i])}
+                label={name}
+                list={`datalist-${Keys[i]}`}
+            />
         ));
 
         return (
@@ -108,8 +106,8 @@ export class FieldInputs extends React.Component<IProps, IState> {
 
                 {this.state.dataListItems.length > 0 && (
                     <datalist id={`datalist-${this.state.activeInputKey}`}>
-                        {this.state.dataListItems.map((value: string, i: number) => (
-                            <option key={i} value={value} />
+                        {this.state.dataListItems.map((value: string) => (
+                            <option key={value} value={value} />
                         ))}
                     </datalist>
                 )}

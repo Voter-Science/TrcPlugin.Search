@@ -5,6 +5,8 @@ import { SheetContainer, IMajorState } from 'trc-react/dist/SheetContainer'
 import { FieldInputs } from './components/FieldInputs'
 import { ColumnNames, ISheetContents, SheetContents } from "trc-sheet/sheetContents";
 
+import TRCContext from 'trc-react/dist/context/TRCContext';
+
 import { Copy } from 'trc-react/dist/common/Copy';
 import { Grid } from 'trc-react/dist/common/Grid';
 import { Panel } from 'trc-react/dist/common/Panel';
@@ -12,8 +14,6 @@ import { PluginLink } from "trc-react/dist/PluginLink";
 import { PluginShell } from 'trc-react/dist/PluginShell';
 import { AllQuestions } from "trc-react/dist/Questions";
 import { SimpleTable } from 'trc-react/dist/SimpleTable';
-
-declare var _trcGlobal: IMajorState;
 
 interface ILookupValues {
     RecId: string;
@@ -35,6 +35,8 @@ interface IState {
 // Lets somebody lookup a voter, and then answer questions about them.
 // See all answers in Audit.
 export class App extends React.Component<{}, IState> {
+    static contextType = TRCContext;
+
     private _topN = 10;
 
     public constructor(props: any) {
@@ -104,7 +106,7 @@ export class App extends React.Component<{}, IState> {
         zip: string,
         precinctName : string
     ): ISheetContents {
-        var data = _trcGlobal._contents;
+        var data = this.context._contents;
 
         first = App.norm(first);
         last = App.norm(last);
@@ -156,7 +158,7 @@ export class App extends React.Component<{}, IState> {
         var newValues: string[] = [];
 
         // UpdateApply update to global data
-        var srcData = _trcGlobal._contents;
+        var srcData = this.context._contents;
         var idxSrc = srcData["RecId"].indexOf(recId);
 
         for (var columnName in answers) {
@@ -168,12 +170,12 @@ export class App extends React.Component<{}, IState> {
         }
 
         // Push result to server
-        _trcGlobal.SheetClient.postUpdateSingleRowAsync(recId, columnNames, newValues)
+        this.context.SheetClient.postUpdateSingleRowAsync(recId, columnNames, newValues)
             .then(() => {
                 // Success. Now go back to looking up another voter.
                 alert("Successfully recorded");
                 this.onSearch(this.state.searchCriteria, false);
-            }).catch((err) => {
+            }).catch((err: any) => {
                 alert("Failed to post response: " + err);
             });
     }
@@ -205,7 +207,7 @@ export class App extends React.Component<{}, IState> {
                 <p>Fill in answers for: {data["RecId"][index]}</p>
                 <AllQuestions
                     onSubmit={this.onSubmitAnswers}
-                    columns={_trcGlobal._info.Columns}
+                    columns={this.context._info.Columns}
                 />
             </div>
         )
@@ -213,7 +215,6 @@ export class App extends React.Component<{}, IState> {
     }
 
     private renderBody1() {
-
         return (
             <PluginShell
                 description={
@@ -236,12 +237,12 @@ export class App extends React.Component<{}, IState> {
                         </Copy>
                         <Copy alignRight bold>
                             <p>
-                                {_trcGlobal._info.CountRecords} total records
+                                {this.context._info.CountRecords} total records
                             </p>
                         </Copy>
                     </Grid>
                     <FieldInputs
-                        data={_trcGlobal._contents}
+                        data={this.context._contents}
                         Names={["RecId", "First", "Last", "Address", "City", "Zip", "PrecinctName"]}
                         Keys={["RecId", "FirstName", "LastName", "Address", "City", "Zip", "PrecinctName"]}
                         onSubmit={this.onSearch}
@@ -276,19 +277,16 @@ export class App extends React.Component<{}, IState> {
     }
 
     render() {
-        return (
-            <div>
-                <SheetContainer
-                    onReady={this.renderBody1}
-                    fetchContents={true}
-                    requireTop={false}>
-                </SheetContainer>
-            </div>
-        );
+        return this.renderBody1();
     };
 }
 
 ReactDOM.render(
-    <App />,
+    <SheetContainer
+        fetchContents={true}
+        requireTop={false}
+    >
+        <App />
+    </SheetContainer>,
     document.getElementById("example")
 );
