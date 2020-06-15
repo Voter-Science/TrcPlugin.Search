@@ -1,18 +1,18 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import { SheetContainer, IMajorState } from 'trc-react/dist/SheetContainer'
-import { FieldInputs } from './components/FieldInputs'
-import { ColumnNames, ISheetContents, SheetContents } from "trc-sheet/sheetContents";
+import { ColumnNames, ISheetContents, SheetContents } from 'trc-sheet/sheetContents';
 
 import TRCContext from 'trc-react/dist/context/TRCContext';
 
 import { Copy } from 'trc-react/dist/common/Copy';
 import { Grid } from 'trc-react/dist/common/Grid';
 import { Panel } from 'trc-react/dist/common/Panel';
-import { PluginLink } from "trc-react/dist/PluginLink";
+import { FieldInputs } from 'trc-react/dist/FieldInputs';
+import { PluginLink } from 'trc-react/dist/PluginLink';
 import { PluginShell } from 'trc-react/dist/PluginShell';
-import { AllQuestions } from "trc-react/dist/Questions";
+import { AllQuestions } from 'trc-react/dist/Questions';
 import { SimpleTable } from 'trc-react/dist/SimpleTable';
 
 interface ILookupValues {
