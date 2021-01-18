@@ -2,7 +2,7 @@
     "Id": "Search",
     "Name": "Simple search for individuals within a sheet",
     "Author" :  "Voter-Science",
-    "Website" :  "https://github.com/Voter-Science/TRC-API-Samples",
+    "Website" :  "https://github.com/Voter-Science/TrcPlugin.Search",
     "Description": "Plugin that lets you do fuzzy name search within the sheet and update answers. Can be useful for updating answers from PDFs.",        
     "Version": "2.0.0",
     "Tags": [ "demo" , "search", "_single" ]
