@@ -29,4 +29,6 @@ artifacts:
 # Don't actually build.
 # build: off
 build_script:
+- ps: set-content -value "ABC" -path .\dist\buildver.txt
 - npm run build
+
