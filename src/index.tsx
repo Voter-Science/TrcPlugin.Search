@@ -262,6 +262,7 @@ export class App extends React.Component<{}, IState> {
                             downloadIcon
                             data={this.state.results}
                             onRowClick={(recId: string) => this.setState({ selectedRecId: recId })}
+                            disableQueryString
                         />
                     )}
                     {!this.state.totalFound && <div>Results will appear here.</div>}
